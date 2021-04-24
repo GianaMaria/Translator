@@ -7,18 +7,23 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.translator.R
 import com.example.translator.model.data.AppState
 import com.example.translator.model.data.DataModel
-import com.example.translator.presenter.Presenter
+import com.example.translator.utils.network.isOnline
 import com.example.translator.view.base.BaseFragment
-import com.example.translator.view.base.MvpView
 import com.example.translator.view.main.adapter.MainAdapter
 import kotlinx.android.synthetic.main.fragment_main.*
 
-class MainFragment : BaseFragment<AppState>() {
+class MainFragment : BaseFragment<AppState, MainInteractor>() {
 
+    override val model: MainViewModel by lazy {
+        ViewModelProvider.NewInstanceFactory().create(MainViewModel::class.java)
+    }
+    private val observer = Observer<AppState> { renderData(it) }
     private var adapter: MainAdapter? = null
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
@@ -26,10 +31,6 @@ class MainFragment : BaseFragment<AppState>() {
                 Toast.makeText(activity?.applicationContext, data.text, Toast.LENGTH_SHORT).show()
             }
         }
-
-    override fun createPresenter(): Presenter<AppState, MvpView> {
-        return MainPresenterImpl()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,12 +41,13 @@ class MainFragment : BaseFragment<AppState>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         search_fab.setOnClickListener {
             val searchDialogFragment = SearchDialogFragment.newInstance()
             searchDialogFragment.setOnSearchClickListener(object :
                 SearchDialogFragment.OnSearchClickListener {
                 override fun onClick(searchWord: String) {
-                    presenter.getData(searchWord, true)
+                    model.getData(searchWord, true).observe(this@MainFragment, observer)
                 }
             })
             fragmentManager?.let { it1 ->
@@ -60,8 +62,8 @@ class MainFragment : BaseFragment<AppState>() {
     override fun renderData(appState: AppState) {
         when (appState) {
             is AppState.Success -> {
-                val dataModel = appState.data
-                if (dataModel == null || dataModel.isEmpty()) {
+                val data = appState.data
+                if (data == null || data.isEmpty()) {
                     showErrorScreen(getString(R.string.empty_server_response_on_success))
                 } else {
                     showViewSuccess()
@@ -69,9 +71,9 @@ class MainFragment : BaseFragment<AppState>() {
                         main_activity_recyclerview.layoutManager =
                             LinearLayoutManager(activity?.applicationContext)
                         main_activity_recyclerview.adapter =
-                            MainAdapter(onListItemClickListener, dataModel)
+                            MainAdapter(onListItemClickListener, data)
                     } else {
-                        adapter!!.setData(dataModel)
+                        adapter!!.setData(data)
                     }
                 }
             }
@@ -96,7 +98,7 @@ class MainFragment : BaseFragment<AppState>() {
         showViewError()
         error_textview.text = error ?: getString(R.string.undefined_error)
         reload_button.setOnClickListener {
-            presenter.getData("hi", true)
+            model.getData("hi", true).observe(this, observer)
         }
     }
 
@@ -122,5 +124,4 @@ class MainFragment : BaseFragment<AppState>() {
         private const val BOTTOM_SHEET_FRAGMENT_DIALOG_TAG =
             "74a54328-5d62-46bf-ab6b-cbf5fgt0-092395"
     }
-
 }
