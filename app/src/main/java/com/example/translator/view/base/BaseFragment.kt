@@ -1,7 +1,5 @@
 package com.example.translator.view.base
 
-import android.app.Activity
-import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import com.example.translator.R
@@ -17,16 +15,16 @@ abstract class BaseFragment<T : AppState, I : Interactor<T>> : Fragment() {
 
     protected var isNetworkAvailable: Boolean = false
 
-
     val contextFragment = activity?.applicationContext
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        isNetworkAvailable = isOnline(activity.applicationContext) == true
+        isNetworkAvailable = activity?.let { isOnline(it.applicationContext) } == true
     }
 
     override fun onResume() {
         super.onResume()
-        isNetworkAvailable = isOnline()
+        isNetworkAvailable = activity?.let { isOnline(it.applicationContext) } == true
         if (!isNetworkAvailable && isDialogNull()) {
             showNoInternetConnectionDialog()
         }
