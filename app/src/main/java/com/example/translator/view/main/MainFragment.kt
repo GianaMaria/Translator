@@ -1,31 +1,32 @@
 package com.example.translator.view.main
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.View.*
-import android.view.ViewGroup
-import android.widget.Toast
+import android.view.*
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.translator.R
 import com.example.translator.model.data.AppState
 import com.example.translator.model.data.DataModel
+import com.example.translator.utils.convertMeaningsToString
 import com.example.translator.utils.network.isOnline
 import com.example.translator.view.base.BaseFragment
+import com.example.translator.view.descriptionscreen.DescriptionFragment
+import com.example.translator.view.history.HistoryFragment
 import com.example.translator.view.main.adapter.MainAdapter
 import kotlinx.android.synthetic.main.fragment_main.*
 import org.koin.android.viewmodel.ext.android.viewModel
+
+private const val BOTTOM_SHEET_FRAGMENT_DIALOG_TAG = "74a54328-5d62-46bf-ab6b-cbf5fgt0-092395"
 
 class MainFragment : BaseFragment<AppState, MainInteractor>() {
 
     override lateinit var model: MainViewModel
     private val adapter: MainAdapter by lazy { MainAdapter(onListItemClickListener) }
+
     private val fabClickListener: View.OnClickListener =
         View.OnClickListener {
             val searchDialogFragment = SearchDialogFragment.newInstance()
             searchDialogFragment.setOnSearchClickListener(onSearchClickListener)
-            fragmentManager?.let { it1 ->
+            parentFragmentManager.let { it1 ->
                 searchDialogFragment.show(
                     it1,
                     BOTTOM_SHEET_FRAGMENT_DIALOG_TAG
@@ -35,7 +36,14 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
             override fun onItemClick(data: DataModel) {
-                Toast.makeText(activity?.applicationContext, data.text, Toast.LENGTH_SHORT).show()
+                parentFragmentManager.beginTransaction().replace(
+                    R.id.container, DescriptionFragment.newInstance(
+                        data.text,
+                        convertMeaningsToString(data.meanings!!),
+                        data.meanings[0].imageUrl
+                    )
+                ).addToBackStack(null)
+                    .commit()
             }
         }
     private val onSearchClickListener: SearchDialogFragment.OnSearchClickListener =
@@ -54,6 +62,16 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
         super.onCreate(savedInstanceState)
         iniViewModel()
         initViews()
+        main_activity_recyclerview.adapter = adapter
+        setActionbarHomeButtonAsUp()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        iniViewModel()
+        initViews()
+        main_activity_recyclerview.adapter = adapter
+        setActionbarHomeButtonAsUp()
     }
 
     override fun onCreateView(
@@ -63,35 +81,23 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
         return inflater.inflate(R.layout.fragment_main, container, false)
     }
 
-    override fun renderData(appState: AppState) {
-        when (appState) {
-            is AppState.Success -> {
-                showViewWorking()
-                val data = appState.data
-                if (data.isNullOrEmpty()) {
-                    showAlertDialog(
-                        getString(R.string.dialog_title_sorry),
-                        getString(R.string.empty_server_response_on_success)
-                    )
-                } else {
-                    adapter.setData(data)
-                }
+    override fun setDataToAdapter(data: List<DataModel>) {
+        adapter.setData(data)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.history_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.menu_history -> {
+                parentFragmentManager.beginTransaction()
+                    .replace(R.id.container, HistoryFragment()).addToBackStack(null).commit()
+                return true
             }
-            is AppState.Loading -> {
-                showViewLoading()
-                if (appState.progress != null) {
-                    progress_bar_horizontal.visibility = VISIBLE
-                    progress_bar_round.visibility = GONE
-                    progress_bar_horizontal.progress = appState.progress
-                } else {
-                    progress_bar_horizontal.visibility = GONE
-                    progress_bar_round.visibility = VISIBLE
-                }
-            }
-            is AppState.Error -> {
-                showViewWorking()
-                showAlertDialog(getString(R.string.error_stub), appState.error.message)
-            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -101,25 +107,18 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
         }
         val viewModel: MainViewModel by viewModel()
         model = viewModel
-        model.subscribe().observe(this@MainFragment, Observer<AppState> { renderData(it) })
+        model.subscribe().observe(viewLifecycleOwner, Observer<AppState> { renderData(it) })
+
     }
 
     private fun initViews() {
         search_fab.setOnClickListener(fabClickListener)
-        main_activity_recyclerview.layoutManager = LinearLayoutManager(activity?.applicationContext)
         main_activity_recyclerview.adapter = adapter
     }
 
-    private fun showViewWorking() {
-        loading_frame_layout.visibility = GONE
-    }
-
-    private fun showViewLoading() {
-        loading_frame_layout.visibility = VISIBLE
-    }
-
-    companion object {
-        private const val BOTTOM_SHEET_FRAGMENT_DIALOG_TAG =
-            "74a54328-5d62-46bf-ab6b-cbf5fgt0-092395"
+    private fun setActionbarHomeButtonAsUp() {
+        val activity = activity as MainActivity
+        activity.supportActionBar?.setHomeButtonEnabled(false)
+        activity.supportActionBar?.setDisplayHomeAsUpEnabled(false)
     }
 }

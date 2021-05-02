@@ -2,7 +2,8 @@ package com.example.translator.view.main
 
 import androidx.lifecycle.LiveData
 import com.example.translator.model.data.AppState
-import com.example.translator.utils.parseSearchResults
+import com.example.translator.utils.parseOnlineSearchResults
+
 import com.example.translator.viewModel.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,7 +27,7 @@ class MainViewModel(private val interactor: MainInteractor) :
     //Doesn't have to use withContext for Retrofit call if you use .addCallAdapterFactory(CoroutineCallAdapterFactory()). The same goes for Room
     private suspend fun startInteractor(word: String, isOnline: Boolean) =
         withContext(Dispatchers.IO) {
-            _mutableLiveData.postValue(parseSearchResults(interactor.getData(word, isOnline)))
+            _mutableLiveData.postValue(parseOnlineSearchResults(interactor.getData(word, isOnline)))
         }
 
     override fun handleError(error: Throwable) {

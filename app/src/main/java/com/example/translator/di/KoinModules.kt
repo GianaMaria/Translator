@@ -9,6 +9,8 @@ import com.example.translator.model.repository.RepositoryImplementation
 import com.example.translator.model.repository.RepositoryImplementationLocal
 import com.example.translator.model.repository.RepositoryLocal
 import com.example.translator.room.HistoryDataBase
+import com.example.translator.view.history.HistoryInteractor
+import com.example.translator.view.history.HistoryViewModel
 import com.example.translator.view.main.MainInteractor
 import com.example.translator.view.main.MainViewModel
 import org.koin.dsl.module
