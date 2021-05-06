@@ -9,16 +9,11 @@ import kotlinx.coroutines.launch
 class HistoryViewModel(private val interactor: HistoryInteractor) :
     BaseViewModel<AppState>() {
 
-    private val liveDataForViewToObserve: LiveData<AppState> = _mutableLiveData
-
-    fun subscribe(): LiveData<AppState> {
-        return liveDataForViewToObserve
-    }
-
-    override fun getData(word: String, isOnline: Boolean) {
+    override fun getData(word: String, isOnline: Boolean): LiveData<AppState> {
         _mutableLiveData.value = AppState.Loading(null)
         cancelJob()
         viewModelCoroutineScope.launch { startInteractor(word, isOnline) }
+        return _mutableLiveData
     }
 
     private suspend fun startInteractor(word: String, isOnline: Boolean) {

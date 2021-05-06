@@ -13,20 +13,28 @@ import com.example.translator.view.history.HistoryInteractor
 import com.example.translator.view.history.HistoryViewModel
 import com.example.translator.view.main.MainInteractor
 import com.example.translator.view.main.MainViewModel
+import org.koin.android.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 
 val application = module {
     single { Room.databaseBuilder(get(), HistoryDataBase::class.java, "HistoryDB").build() }
     single { get<HistoryDataBase>().historyDao() }
+
     single<Repository<List<DataModel>>> { RepositoryImplementation(RetrofitImplementation()) }
-    single<RepositoryLocal<List<DataModel>>> { RepositoryImplementationLocal(RoomDataBaseImplementation(get()))
+
+    single<RepositoryLocal<List<DataModel>>> {
+        RepositoryImplementationLocal(RoomDataBaseImplementation(get()))
     }
 }
 
 val mainScreen = module {
-    factory { MainViewModel(get()) }
-    factory { MainInteractor(get(), get()) }
+    single {
+        MainInteractor(get(), get())
+    }
+    viewModel {
+        MainViewModel(get())
+    }
 }
 
 val historyScreen = module {

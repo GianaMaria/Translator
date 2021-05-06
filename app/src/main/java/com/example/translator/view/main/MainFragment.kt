@@ -19,20 +19,9 @@ private const val BOTTOM_SHEET_FRAGMENT_DIALOG_TAG = "74a54328-5d62-46bf-ab6b-cb
 
 class MainFragment : BaseFragment<AppState, MainInteractor>() {
 
-    override lateinit var model: MainViewModel
+    override val model by viewModel<MainViewModel>()
     private val adapter: MainAdapter by lazy { MainAdapter(onListItemClickListener) }
 
-    private val fabClickListener: View.OnClickListener =
-        View.OnClickListener {
-            val searchDialogFragment = SearchDialogFragment.newInstance()
-            searchDialogFragment.setOnSearchClickListener(onSearchClickListener)
-            parentFragmentManager.let { it1 ->
-                searchDialogFragment.show(
-                    it1,
-                    BOTTOM_SHEET_FRAGMENT_DIALOG_TAG
-                )
-            }
-        }
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
             override fun onItemClick(data: DataModel) {
@@ -46,33 +35,6 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
                     .commit()
             }
         }
-    private val onSearchClickListener: SearchDialogFragment.OnSearchClickListener =
-        object : SearchDialogFragment.OnSearchClickListener {
-            override fun onClick(searchWord: String) {
-                isNetworkAvailable = activity?.let { isOnline(it.applicationContext) } == true
-                if (isNetworkAvailable) {
-                    model.getData(searchWord, isNetworkAvailable)
-                } else {
-                    showNoInternetConnectionDialog()
-                }
-            }
-        }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        iniViewModel()
-        initViews()
-        main_activity_recyclerview.adapter = adapter
-        setActionbarHomeButtonAsUp()
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        iniViewModel()
-        initViews()
-        main_activity_recyclerview.adapter = adapter
-        setActionbarHomeButtonAsUp()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -81,8 +43,28 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
         return inflater.inflate(R.layout.fragment_main, container, false)
     }
 
-    override fun setDataToAdapter(data: List<DataModel>) {
-        adapter.setData(data)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
+        setActionbarHomeButtonAsUp()
+        main_activity_recyclerview.adapter = adapter
+
+        search_fab.setOnClickListener {
+            val searchDialogFragment = SearchDialogFragment.newInstance()
+            searchDialogFragment.setOnSearchClickListener(object :
+                SearchDialogFragment.OnSearchClickListener {
+                override fun onClick(searchWord: String) {
+                    isNetworkAvailable = activity?.let { isOnline(it.applicationContext) } == true
+                    if (isNetworkAvailable) {
+                        model.getData(searchWord, isNetworkAvailable)
+                            .observe(viewLifecycleOwner, Observer<AppState> { renderData(it) })
+                    } else {
+                        showNoInternetConnectionDialog()
+                    }
+                }
+            })
+            searchDialogFragment.show(childFragmentManager, BOTTOM_SHEET_FRAGMENT_DIALOG_TAG)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -101,19 +83,8 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
         }
     }
 
-    private fun iniViewModel() {
-        if (main_activity_recyclerview.adapter != null) {
-            throw IllegalStateException("The ViewModel should be initialised first")
-        }
-        val viewModel: MainViewModel by viewModel()
-        model = viewModel
-        model.subscribe().observe(viewLifecycleOwner, Observer<AppState> { renderData(it) })
-
-    }
-
-    private fun initViews() {
-        search_fab.setOnClickListener(fabClickListener)
-        main_activity_recyclerview.adapter = adapter
+    override fun setDataToAdapter(data: List<DataModel>) {
+        adapter.setData(data)
     }
 
     private fun setActionbarHomeButtonAsUp() {
