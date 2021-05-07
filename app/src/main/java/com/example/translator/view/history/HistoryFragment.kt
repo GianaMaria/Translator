@@ -6,9 +6,9 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
+import com.example.model.data.AppState
+import com.example.model.data.DataModel
 import com.example.translator.R
-import com.example.translator.model.data.AppState
-import com.example.translator.model.data.DataModel
 import com.example.translator.view.base.BaseFragment
 import com.example.translator.view.main.MainActivity
 import kotlinx.android.synthetic.main.fragment_history.*
@@ -36,8 +36,8 @@ class HistoryFragment : BaseFragment<AppState, HistoryInteractor>() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                parentFragmentManager.beginTransaction().replace(R.id.container, HistoryFragment())
-                    .addToBackStack(null).commit()
+                fragmentManager?.beginTransaction()?.replace(R.id.container, HistoryFragment())
+                    ?.addToBackStack(null)?.commit()
                 true
             }
             else -> super.onOptionsItemSelected(item)

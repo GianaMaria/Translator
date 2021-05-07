@@ -8,9 +8,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import com.example.translator.R
-import com.example.translator.utils.network.isOnline
-import com.example.translator.utils.ui.AlertDialogFragment
 import com.example.translator.view.main.MainActivity
+import com.example.utils.network.isOnline
+import com.example.utils.ui.AlertDialogFragment
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_description.*
@@ -35,7 +35,7 @@ class DescriptionFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                parentFragmentManager.popBackStack()
+                fragmentManager?.popBackStack()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -66,13 +66,15 @@ class DescriptionFragment : Fragment() {
         if (activity?.let { isOnline(it.applicationContext) } == true) {
             setData()
         } else {
-            AlertDialogFragment.newInstance(
-                getString(R.string.dialog_title_device_is_offline),
-                getString(R.string.dialog_message_device_is_offline)
-            ).show(
-                parentFragmentManager,
-                DIALOG_FRAGMENT_TAG
-            )
+            fragmentManager?.let {
+                AlertDialogFragment.newInstance(
+                    getString(R.string.dialog_title_device_is_offline),
+                    getString(R.string.dialog_message_device_is_offline)
+                ).show(
+                    it,
+                    DIALOG_FRAGMENT_TAG
+                )
+            }
             stopRefreshAnimationIfNeeded()
         }
     }

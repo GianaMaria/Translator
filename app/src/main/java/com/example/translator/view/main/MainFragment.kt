@@ -3,15 +3,15 @@ package com.example.translator.view.main
 import android.os.Bundle
 import android.view.*
 import androidx.lifecycle.Observer
+import com.example.model.data.AppState
+import com.example.model.data.DataModel
 import com.example.translator.R
-import com.example.translator.model.data.AppState
-import com.example.translator.model.data.DataModel
 import com.example.translator.utils.convertMeaningsToString
-import com.example.translator.utils.network.isOnline
 import com.example.translator.view.base.BaseFragment
 import com.example.translator.view.descriptionscreen.DescriptionFragment
 import com.example.translator.view.history.HistoryFragment
 import com.example.translator.view.main.adapter.MainAdapter
+import com.example.utils.network.isOnline
 import kotlinx.android.synthetic.main.fragment_main.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -25,14 +25,14 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
             override fun onItemClick(data: DataModel) {
-                parentFragmentManager.beginTransaction().replace(
+                fragmentManager?.beginTransaction()?.replace(
                     R.id.container, DescriptionFragment.newInstance(
                         data.text,
                         convertMeaningsToString(data.meanings!!),
-                        data.meanings[0].imageUrl
+                        data.meanings!![0].imageUrl
                     )
-                ).addToBackStack(null)
-                    .commit()
+                )?.addToBackStack(null)
+                    ?.commit()
             }
         }
 
@@ -75,8 +75,8 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_history -> {
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.container, HistoryFragment()).addToBackStack(null).commit()
+                fragmentManager?.beginTransaction()
+                    ?.replace(R.id.container, HistoryFragment())?.addToBackStack(null)?.commit()
                 return true
             }
             else -> super.onOptionsItemSelected(item)

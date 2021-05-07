@@ -3,13 +3,13 @@ package com.example.translator.view.base
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import com.example.core.viewModel.BaseViewModel
+import com.example.core.viewModel.Interactor
+import com.example.model.data.AppState
+import com.example.model.data.DataModel
 import com.example.translator.R
-import com.example.translator.model.data.AppState
-import com.example.translator.model.data.DataModel
-import com.example.translator.utils.network.isOnline
-import com.example.translator.utils.ui.AlertDialogFragment
-import com.example.translator.viewModel.BaseViewModel
-import com.example.translator.viewModel.Interactor
+import com.example.utils.network.isOnline
+import com.example.utils.ui.AlertDialogFragment
 import kotlinx.android.synthetic.main.loading_layout.*
 
 private const val DIALOG_FRAGMENT_TAG = "74a54328-5d62-46bf-ab6b-cbf5d8c79522"
@@ -52,7 +52,7 @@ abstract class BaseFragment<T : AppState, I : Interactor<T>> : Fragment() {
                 if (appState.progress != null) {
                     progress_bar_horizontal.visibility = View.VISIBLE
                     progress_bar_round.visibility = View.GONE
-                    progress_bar_horizontal.progress = appState.progress
+                    progress_bar_horizontal.progress = appState.progress!!
                 } else {
                     progress_bar_horizontal.visibility = View.GONE
                     progress_bar_round.visibility = View.VISIBLE
@@ -73,8 +73,10 @@ abstract class BaseFragment<T : AppState, I : Interactor<T>> : Fragment() {
     }
 
     protected fun showAlertDialog(title: String?, message: String?) {
-        AlertDialogFragment.newInstance(title, message)
-            .show(parentFragmentManager, DIALOG_FRAGMENT_TAG)
+        fragmentManager?.let {
+            AlertDialogFragment.newInstance(title, message)
+                .show(it, DIALOG_FRAGMENT_TAG)
+        }
     }
 
     private fun showViewWorking() {
@@ -86,7 +88,7 @@ abstract class BaseFragment<T : AppState, I : Interactor<T>> : Fragment() {
     }
 
     private fun isDialogNull(): Boolean {
-        return parentFragmentManager.findFragmentByTag(DIALOG_FRAGMENT_TAG) == null
+        return fragmentManager?.findFragmentByTag(DIALOG_FRAGMENT_TAG) == null
     }
 
     abstract fun setDataToAdapter(data: List<DataModel>)

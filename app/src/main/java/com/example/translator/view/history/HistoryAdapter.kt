@@ -5,8 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.model.data.DataModel
 import com.example.translator.R
-import com.example.translator.model.data.DataModel
 import kotlinx.android.synthetic.main.fragment_hidtory_item_recyclerview.view.*
 
 
