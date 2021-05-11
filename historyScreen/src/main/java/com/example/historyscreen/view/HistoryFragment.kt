@@ -1,4 +1,4 @@
-package com.example.translator.view.history
+package com.example.historyscreen.view
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,11 +6,11 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
+import com.example.core.BaseFragment
+import com.example.historyscreen.injectDependencies
 import com.example.model.data.AppState
 import com.example.model.data.DataModel
-import com.example.translator.R
-import com.example.translator.view.base.BaseFragment
-import com.example.translator.view.main.MainActivity
+import com.example.translator.historyScreen.R
 import kotlinx.android.synthetic.main.fragment_history.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -29,7 +29,6 @@ class HistoryFragment : BaseFragment<AppState, HistoryInteractor>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
-        setActionbarHomeButtonAsUp()
         model.getData("", false).observe(viewLifecycleOwner, Observer<AppState> { renderData(it) })
     }
 
@@ -46,17 +45,11 @@ class HistoryFragment : BaseFragment<AppState, HistoryInteractor>() {
 
     private fun initViews() {
         setHasOptionsMenu(true)
+        injectDependencies()
         history_fragment_recyclerview.adapter = adapter
     }
 
     override fun setDataToAdapter(data: List<DataModel>) {
         adapter.setData(data)
     }
-
-    private fun setActionbarHomeButtonAsUp() {
-        val activity = activity as MainActivity
-        activity.supportActionBar?.setHomeButtonEnabled(true)
-        activity.supportActionBar?.setDisplayHomeAsUpEnabled(true)
-    }
-
 }

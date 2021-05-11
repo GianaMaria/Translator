@@ -1,9 +1,9 @@
-package com.example.translator.view.history
+package com.example.historyscreen.view
 
 import androidx.lifecycle.LiveData
 import com.example.core.viewModel.BaseViewModel
+import com.example.historyscreen.parseLocalSearchResults
 import com.example.model.data.AppState
-import com.example.translator.utils.parseLocalSearchResults
 import kotlinx.coroutines.launch
 
 class HistoryViewModel(private val interactor: HistoryInteractor) :

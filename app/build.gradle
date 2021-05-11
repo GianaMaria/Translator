@@ -1,9 +1,6 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
-
 apply plugin: 'kotlin-kapt'
 
 android {
@@ -33,6 +30,7 @@ android {
     kotlinOptions {
         jvmTarget = Config.jvm_target
     }
+    dynamicFeatures = [':description']
 }
 
 dependencies {
@@ -76,8 +74,13 @@ dependencies {
     kapt Room.compiler
     implementation Room.room_ktx
 
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation GooglePlay.googlePlayCore
+
     implementation project(Modules.core)
     implementation project(Modules.model)
     implementation project(Modules.repository)
+    implementation project(Modules.description)
     api project(Modules.utils)
 }

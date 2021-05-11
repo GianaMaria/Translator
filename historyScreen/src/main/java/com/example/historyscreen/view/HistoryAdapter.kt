@@ -1,4 +1,4 @@
-package com.example.translator.view.history
+package com.example.historyscreen.view
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,8 +6,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.model.data.DataModel
-import com.example.translator.R
-import kotlinx.android.synthetic.main.fragment_hidtory_item_recyclerview.view.*
+import com.example.translator.historyScreen.R
+import kotlinx.android.synthetic.main.fragment_history_item_recyclerview.view.*
 
 
 class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.RecyclerItemViewHolder>() {
@@ -22,7 +22,7 @@ class HistoryAdapter : RecyclerView.Adapter<HistoryAdapter.RecyclerItemViewHolde
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerItemViewHolder {
         return RecyclerItemViewHolder(
             LayoutInflater.from(parent.context)
-                .inflate(R.layout.fragment_hidtory_item_recyclerview, parent, false) as View
+                .inflate(R.layout.fragment_history_item_recyclerview, parent, false) as View
         )
     }
 

@@ -21,6 +21,7 @@ object Modules {
     const val model = ":model"
     const val repository = ":repository"
     const val utils = ":utils"
+    const val description = ":description"
 }
 
 object Versions {
@@ -62,6 +63,9 @@ object Versions {
     const val dagger = "2.17"
 
     const val legacy = "1.0.0"
+
+    //Google Play
+    const val googlePlayCore = "1.6.3"
 
 }
 
@@ -131,4 +135,8 @@ object Dagger {
 
 object Legacy {
     const val support = "androidx.legacy:legacy-support-v4:${Versions.legacy}"
-} 
+}
+
+object GooglePlay {
+    const val googlePlayCore = "com.google.android.play:core:${Versions.googlePlayCore}"
+}

@@ -1,10 +1,11 @@
-package com.example.translator.view.history
+package com.example.historyscreen.view
 
 import com.example.core.viewModel.Interactor
 import com.example.model.data.AppState
 import com.example.model.data.DataModel
 import com.example.repository.repository.Repository
 import com.example.repository.repository.RepositoryLocal
+
 
 class HistoryInteractor(
     private val repositoryRemote: Repository<List<DataModel>>,
