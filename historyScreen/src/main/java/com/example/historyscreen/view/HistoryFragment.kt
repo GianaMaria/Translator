@@ -7,10 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import com.example.core.BaseFragment
+import com.example.historyscreen.R
 import com.example.historyscreen.injectDependencies
 import com.example.model.data.AppState
 import com.example.model.data.DataModel
-import com.example.translator.historyScreen.R
 import kotlinx.android.synthetic.main.fragment_history.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -35,8 +35,7 @@ class HistoryFragment : BaseFragment<AppState, HistoryInteractor>() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                fragmentManager?.beginTransaction()?.replace(R.id.container, HistoryFragment())
-                    ?.addToBackStack(null)?.commit()
+                fragmentManager?.popBackStack()
                 true
             }
             else -> super.onOptionsItemSelected(item)

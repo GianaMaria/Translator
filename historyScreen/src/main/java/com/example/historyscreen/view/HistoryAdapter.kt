@@ -5,8 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.historyscreen.R
 import com.example.model.data.DataModel
-import com.example.translator.historyScreen.R
 import kotlinx.android.synthetic.main.fragment_history_item_recyclerview.view.*
 
 

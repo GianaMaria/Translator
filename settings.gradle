@@ -6,4 +6,4 @@ include ':model'
 include ':utils'
 include ':repository'
 include ':historyScreen'
-include ':description'
+

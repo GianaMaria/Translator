@@ -30,7 +30,8 @@ android {
     kotlinOptions {
         jvmTarget = Config.jvm_target
     }
-    dynamicFeatures = [':description']
+
+    dynamicFeatures = [Modules.historyScreen]
 }
 
 dependencies {
@@ -81,6 +82,5 @@ dependencies {
     implementation project(Modules.core)
     implementation project(Modules.model)
     implementation project(Modules.repository)
-    implementation project(Modules.description)
     api project(Modules.utils)
 }
