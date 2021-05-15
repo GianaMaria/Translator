@@ -6,18 +6,21 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.RecyclerView
 import com.example.core.BaseFragment
 import com.example.historyscreen.R
 import com.example.historyscreen.injectDependencies
 import com.example.model.data.AppState
 import com.example.model.data.DataModel
+import com.example.utils.ui.viewById
 import kotlinx.android.synthetic.main.fragment_history.*
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class HistoryFragment : BaseFragment<AppState, HistoryInteractor>() {
 
-    override val model by viewModel<HistoryViewModel>()
+    override lateinit var model: HistoryViewModel
     private val adapter: HistoryAdapter by lazy { HistoryAdapter() }
+    private val historyFragmentRecyclerView by viewById<RecyclerView>(R.id.history_fragment_recyclerview)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

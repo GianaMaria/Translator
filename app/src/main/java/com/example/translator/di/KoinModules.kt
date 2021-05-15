@@ -9,9 +9,12 @@ import com.example.repository.repository.RepositoryImplementation
 import com.example.repository.repository.RepositoryImplementationLocal
 import com.example.repository.repository.RepositoryLocal
 import com.example.repository.room.HistoryDataBase
+import com.example.translator.view.main.MainFragment
 import com.example.translator.view.main.MainInteractor
 import com.example.translator.view.main.MainViewModel
+import org.koin.android.viewmodel.dsl.viewModel
 import org.koin.core.context.loadKoinModules
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 fun injectDependencies() = loadModules
@@ -30,8 +33,10 @@ val application = module {
 }
 
 val mainScreen = module {
-    factory { MainViewModel(get()) }
-    factory { MainInteractor(get(), get()) }
+    scope(named<MainFragment>()) {
+        scoped { MainInteractor(get(), get()) }
+        viewModel { MainViewModel(get()) }
+    }
 }
 
 

@@ -5,6 +5,7 @@ import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.RecyclerView
 import com.example.core.BaseFragment
 import com.example.model.data.AppState
 import com.example.model.data.DataModel
@@ -13,12 +14,12 @@ import com.example.translator.di.injectDependencies
 import com.example.translator.utils.convertMeaningsToString
 import com.example.translator.view.descriptionscreen.DescriptionFragment
 import com.example.translator.view.main.adapter.MainAdapter
-import com.example.utils.network.isOnline
+import com.example.utils.ui.viewById
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.play.core.splitinstall.SplitInstallManager
 import com.google.android.play.core.splitinstall.SplitInstallManagerFactory
 import com.google.android.play.core.splitinstall.SplitInstallRequest
-import kotlinx.android.synthetic.main.fragment_main.*
-import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.android.scope.currentScope
 
 private const val BOTTOM_SHEET_FRAGMENT_DIALOG_TAG = "74a54328-5d62-46bf-ab6b-cbf5fgt0-092395"
 private const val HISTORY_FRAGMENT_PATH = "com.example.historyscreen.view.HistoryFragment"
@@ -28,8 +29,11 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
 
     private lateinit var splitInstallManager: SplitInstallManager
 
-    override val model by viewModel<MainViewModel>()
+    override lateinit var model: MainViewModel
     private val adapter: MainAdapter by lazy { MainAdapter(onListItemClickListener) }
+
+    private val recyclerView by viewById<RecyclerView>(R.id.main_activity_recyclerview)
+    private val fab by viewById<FloatingActionButton>(R.id.search_fab)
 
     private val onListItemClickListener: MainAdapter.OnListItemClickListener =
         object : MainAdapter.OnListItemClickListener {
@@ -57,20 +61,18 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
         setHasOptionsMenu(true)
         setActionbarHomeButtonAsUp(false)
         injectDependencies()
-        main_activity_recyclerview.adapter = adapter
+        val viewModel: MainViewModel by currentScope.inject()
+        model = viewModel
+        recyclerView.adapter = adapter
 
-        search_fab.setOnClickListener {
+        fab.setOnClickListener {
             val searchDialogFragment = SearchDialogFragment.newInstance()
             searchDialogFragment.setOnSearchClickListener(object :
                 SearchDialogFragment.OnSearchClickListener {
                 override fun onClick(searchWord: String) {
-                    isNetworkAvailable = activity?.let { isOnline(it.applicationContext) } == true
-                    if (isNetworkAvailable) {
-                        model.getData(searchWord, isNetworkAvailable)
-                            .observe(viewLifecycleOwner, Observer<AppState> { renderData(it) })
-                    } else {
-                        showNoInternetConnectionDialog()
-                    }
+                    model.getData(searchWord, true)
+                        .observe(viewLifecycleOwner, Observer<AppState> { renderData(it) })
+
                 }
             })
             searchDialogFragment.show(childFragmentManager, BOTTOM_SHEET_FRAGMENT_DIALOG_TAG)
@@ -94,7 +96,7 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
     }
 
     private fun showHistoryFragment() {
-        val fragment = Class.forName("com.example.historyscreen.view.HistoryFragment")
+        val fragment = Class.forName(HISTORY_FRAGMENT_PATH)
             .newInstance() as Fragment
         splitInstallManager = SplitInstallManagerFactory.create(this.context)
         val request = SplitInstallRequest

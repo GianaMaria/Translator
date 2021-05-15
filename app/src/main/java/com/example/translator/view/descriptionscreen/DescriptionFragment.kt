@@ -6,16 +6,22 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import com.example.translator.R
 import com.example.translator.view.main.MainActivity
-import com.example.utils.network.isOnline
+import com.example.utils.network.OnlineLiveData
 import com.example.utils.ui.AlertDialogFragment
+import com.example.utils.ui.viewById
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_description.*
 
 class DescriptionFragment : Fragment() {
+
+    private val descriptionHeader by viewById<TextView>(R.id.description_header)
+    private val descriptionTextView by viewById<TextView>(R.id.description_textview)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,8 +53,8 @@ class DescriptionFragment : Fragment() {
         val translate = arguments?.getString(DESCRIPTION_EXTRA)
         val imageUrl = arguments?.getString(URL_EXTRA)
 
-        description_header.text = word
-        description_textview.text = translate
+        descriptionHeader.text = word
+        descriptionTextView.text = translate
         if (imageUrl.isNullOrBlank()) {
             stopRefreshAnimationIfNeeded()
         } else {
@@ -63,19 +69,24 @@ class DescriptionFragment : Fragment() {
     }
 
     private fun startLoadingOrShowError() {
-        if (activity?.let { isOnline(it.applicationContext) } == true) {
-            setData()
-        } else {
-            fragmentManager?.let {
-                AlertDialogFragment.newInstance(
-                    getString(R.string.dialog_title_device_is_offline),
-                    getString(R.string.dialog_message_device_is_offline)
-                ).show(
-                    it,
-                    DIALOG_FRAGMENT_TAG
-                )
-            }
-            stopRefreshAnimationIfNeeded()
+        this.context?.let {
+            OnlineLiveData(it).observe(
+                this@DescriptionFragment,
+                Observer<Boolean> {
+                    if (it) {
+                        setData()
+                    } else {
+                        AlertDialogFragment.newInstance(
+                            getString(R.string.dialog_title_device_is_offline),
+                            getString(R.string.dialog_message_device_is_offline)
+                        ).show(
+                            fragmentManager!!,
+                            DIALOG_FRAGMENT_TAG
+                        )
+                        stopRefreshAnimationIfNeeded()
+                    }
+                }
+            )
         }
     }
 

@@ -1,13 +1,11 @@
 package com.example.core
 
-import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.example.core.viewModel.BaseViewModel
 import com.example.core.viewModel.Interactor
 import com.example.model.data.AppState
 import com.example.model.data.DataModel
-import com.example.utils.network.isOnline
 import com.example.utils.ui.AlertDialogFragment
 import kotlinx.android.synthetic.main.loading_layout.*
 
@@ -15,21 +13,7 @@ private const val DIALOG_FRAGMENT_TAG = "74a54328-5d62-46bf-ab6b-cbf5d8c79522"
 
 abstract class BaseFragment<T : AppState, I : Interactor<T>> : Fragment() {
 
-    abstract val model: BaseViewModel<T>
-    protected var isNetworkAvailable: Boolean = false
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        isNetworkAvailable = activity?.let { isOnline(it.applicationContext) } == true
-    }
-
-    override fun onResume() {
-        super.onResume()
-        isNetworkAvailable = activity?.let { isOnline(it.applicationContext) } == true
-        if (!isNetworkAvailable && isDialogNull()) {
-            showNoInternetConnectionDialog()
-        }
-    }
+    abstract val model: BaseViewModel<T>?
 
     protected fun renderData(appState: T) {
         when (appState) {
