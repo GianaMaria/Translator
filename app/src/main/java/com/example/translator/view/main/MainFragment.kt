@@ -1,8 +1,14 @@
 package com.example.translator.view.main
 
+import android.app.Activity.RESULT_OK
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.*
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +30,7 @@ import org.koin.android.scope.currentScope
 private const val BOTTOM_SHEET_FRAGMENT_DIALOG_TAG = "74a54328-5d62-46bf-ab6b-cbf5fgt0-092395"
 private const val HISTORY_FRAGMENT_PATH = "com.example.historyscreen.view.HistoryFragment"
 private const val HISTORY_FRAGMENT_FEATURE_NAME = "history"
+private const val MAIN_FRAGMENT_SETTINGS_REQUEST_CODE = 42
 
 class MainFragment : BaseFragment<AppState, MainInteractor>() {
 
@@ -84,11 +91,20 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
         inflater.inflate(R.menu.history_menu, menu)
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_history -> {
                 showHistoryFragment()
                 setActionbarHomeButtonAsUp(true)
+                return true
+            }
+            R.id.menu_settings -> {
+                startActivityForResult(
+                    Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY),
+                    MAIN_FRAGMENT_SETTINGS_REQUEST_CODE
+                )
                 return true
             }
             else -> super.onOptionsItemSelected(item)
@@ -117,6 +133,13 @@ class MainFragment : BaseFragment<AppState, MainInteractor>() {
                     Toast.LENGTH_LONG
                 ).show()
             }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if( requestCode == MAIN_FRAGMENT_SETTINGS_REQUEST_CODE){
+            Toast.makeText(this.context, "result_ok", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun setDataToAdapter(data: List<DataModel>) {
