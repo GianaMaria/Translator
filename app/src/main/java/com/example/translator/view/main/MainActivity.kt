@@ -1,8 +1,8 @@
-package com.example.translator
+package com.example.translator.view.main
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.translator.view.main.MainFragment
+import com.example.translator.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

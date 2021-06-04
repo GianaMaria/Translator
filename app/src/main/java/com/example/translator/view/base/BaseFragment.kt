@@ -1,41 +1,57 @@
 package com.example.translator.view.base
 
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.translator.R
 import com.example.translator.model.data.AppState
-import com.example.translator.presenter.Presenter
+import com.example.translator.utils.network.isOnline
+import com.example.translator.utils.ui.AlertDialogFragment
+import com.example.translator.viewModel.BaseViewModel
+import com.example.translator.viewModel.Interactor
 
-abstract class BaseFragment<T : AppState> : Fragment(), MvpView {
+abstract class BaseFragment<T : AppState, I : Interactor<T>> : Fragment() {
 
-    protected lateinit var presenter: Presenter<T, MvpView>
+    abstract val model: BaseViewModel<T>
 
-    protected abstract fun createPresenter(): Presenter<T, MvpView>
+    protected var isNetworkAvailable: Boolean = false
 
-    abstract override fun renderData(appState: AppState)
 
+    val contextFragment = activity?.applicationContext
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        presenter = createPresenter()
+        isNetworkAvailable = isOnline(activity.applicationContext) == true
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_base, container, false)
+    override fun onResume() {
+        super.onResume()
+        isNetworkAvailable = isOnline()
+        if (!isNetworkAvailable && isDialogNull()) {
+            showNoInternetConnectionDialog()
+        }
     }
 
-    override fun onStart() {
-        super.onStart()
-        presenter.attachView(this)
+    protected fun showNoInternetConnectionDialog() {
+        showAlertDialog(
+            getString(R.string.dialog_title_device_is_offline),
+            getString(R.string.dialog_message_device_is_offline)
+        )
     }
 
-    override fun onStop() {
-        super.onStop()
-        presenter.detachView(this)
+    protected fun showAlertDialog(title: String?, message: String?) {
+        fragmentManager?.let {
+            AlertDialogFragment.newInstance(title, message).show(it, DIALOG_FRAGMENT_TAG)
+        }
+    }
+
+    private fun isDialogNull(): Boolean {
+        return fragmentManager?.findFragmentByTag(DIALOG_FRAGMENT_TAG) == null
+    }
+
+    abstract fun renderData(dataModel: T)
+
+    companion object {
+        private const val DIALOG_FRAGMENT_TAG = "74a54328-5d62-46bf-ab6b-cbf5d8c79522"
     }
 }
