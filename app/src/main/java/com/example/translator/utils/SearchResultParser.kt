@@ -1,30 +1,53 @@
 package com.example.translator.utils
 
-import com.example.translator.model.data.AppState
-import com.example.translator.model.data.DataModel
-import com.example.translator.model.data.Meanings
+import com.example.model.data.AppState
+import com.example.model.data.DataModel
+import com.example.model.data.Meanings
 
-fun parseSearchResults(state: AppState): AppState {
+fun parseOnlineSearchResults(data: AppState): AppState {
+    return AppState.Success(mapResult(data, true))
+}
+
+private fun mapResult(
+    data: AppState,
+    isOnline: Boolean
+): List<DataModel> {
     val newSearchResults = arrayListOf<DataModel>()
-    when (state) {
+    when (data) {
         is AppState.Success -> {
-            val searchResults = state.data
-            if (!searchResults.isNullOrEmpty()) {
-                for (searchResult in searchResults) {
-                    parseResult(searchResult, newSearchResults)
-                }
+            getSuccessResultData(data, isOnline, newSearchResults)
+        }
+    }
+    return newSearchResults
+}
+
+private fun getSuccessResultData(
+    data: AppState.Success,
+    isOnline: Boolean,
+    newDataModels: ArrayList<DataModel>
+) {
+    val dataModels: List<DataModel> = data.data as List<DataModel>
+    if (dataModels.isNotEmpty()) {
+        if (isOnline) {
+            for (searchResult in dataModels) {
+                parseOnlineResult(searchResult, newDataModels)
+            }
+        } else {
+            for (searchResult in dataModels) {
+                newDataModels.add(DataModel(searchResult.text, arrayListOf()))
             }
         }
     }
-
-    return AppState.Success(newSearchResults)
 }
 
-private fun parseResult(dataModel: DataModel, newDataModels: ArrayList<DataModel>) {
+private fun parseOnlineResult(
+    dataModel: DataModel,
+    newDataModels: ArrayList<DataModel>
+) {
     if (!dataModel.text.isNullOrBlank() && !dataModel.meanings.isNullOrEmpty()) {
         val newMeanings = arrayListOf<Meanings>()
-        for (meaning in dataModel.meanings) {
-            if (meaning.translation != null && !meaning.translation.translation.isNullOrBlank()) {
+        for (meaning in dataModel.meanings!!) {
+            if (meaning.translation != null && !meaning.translation!!.translation.isNullOrBlank()) {
                 newMeanings.add(Meanings(meaning.translation, meaning.imageUrl))
             }
         }
@@ -45,3 +68,4 @@ fun convertMeaningsToString(meanings: List<Meanings>): String {
     }
     return meaningsSeparatedByComma
 }
+

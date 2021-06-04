@@ -1,22 +1,25 @@
 package com.example.translator.view.main
 
-import com.example.translator.model.data.AppState
-import com.example.translator.model.data.DataModel
-import com.example.translator.model.repository.Repository
-import com.example.translator.viewModel.Interactor
-import io.reactivex.Observable
-
+import com.example.core.viewModel.Interactor
+import com.example.model.data.AppState
+import com.example.model.data.DataModel
+import com.example.repository.repository.Repository
+import com.example.repository.repository.RepositoryLocal
 
 class MainInteractor(
-    private val remoteRepository: Repository<List<DataModel>>,
-    private val localRepository: Repository<List<DataModel>>
+    private val repositoryRemote: Repository<List<DataModel>>,
+    private val repositoryLocal: RepositoryLocal<List<DataModel>>
 ) : Interactor<AppState> {
 
-    override fun getData(word: String, fromRemoteSource: Boolean): Observable<AppState> {
-        return if (fromRemoteSource) {
-            remoteRepository.getData(word).map { AppState.Success(it) }
+    override suspend fun getData(word: String, fromRemoteSource: Boolean): AppState {
+        val appState: AppState
+        if (fromRemoteSource) {
+            appState = AppState.Success(repositoryRemote.getData(word))
+            repositoryLocal.saveToDB(appState)
         } else {
-            localRepository.getData(word).map { AppState.Success(it) }
+            appState = AppState.Success(repositoryLocal.getData(word))
         }
+        return appState
     }
 }
+

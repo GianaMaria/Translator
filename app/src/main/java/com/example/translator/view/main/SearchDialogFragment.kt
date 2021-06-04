@@ -6,25 +6,26 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import com.example.translator.R
-import com.example.translator.utils.getEmptyString
+import com.example.utils.getEmptyString
+import com.example.utils.ui.viewById
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.textfield.TextInputEditText
-import kotlinx.android.synthetic.main.search_dialog_fragment.*
 
 class SearchDialogFragment : BottomSheetDialogFragment() {
 
-    private lateinit var searchEditText: TextInputEditText
-    private lateinit var clearTextImageView: ImageView
-    private lateinit var searchButton: TextView
+    private val searchEditText by viewById<EditText>(R.id.search_edit_text)
+    private val searchButton by viewById<TextView>(R.id.search_button_textview)
+    private val clearTextImageView by viewById<ImageView>(R.id.clear_text_imageview)
+
     private var onSearchClickListener: OnSearchClickListener? = null
 
     private val textWatcher = object : TextWatcher {
 
         override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-            if (searchEditText.text != null && !searchEditText.text.toString().isEmpty()) {
+            if (searchEditText.text != null && searchEditText.text.toString().isNotEmpty()) {
                 searchButton.isEnabled = true
                 clearTextImageView.visibility = View.VISIBLE
             } else {
@@ -58,10 +59,6 @@ class SearchDialogFragment : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        searchEditText = search_edit_text
-        clearTextImageView = clear_text_imageview
-        searchButton = search_button_textview
-
         searchButton.setOnClickListener(onSearchButtonClickListener)
         searchEditText.addTextChangedListener(textWatcher)
         addOnClearClickListener()
